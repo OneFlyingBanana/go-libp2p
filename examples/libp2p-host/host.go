@@ -11,6 +11,7 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/routing"
 	"github.com/libp2p/go-libp2p/p2p/security/noise"
 	libp2ptls "github.com/libp2p/go-libp2p/p2p/security/tls"
@@ -100,14 +101,20 @@ func run() {
 	// this is an example and the peer will die as soon as it finishes, so
 	// it is unnecessary to put strain on the network.
 
-	/*
-		// This connects to public bootstrappers
-		for _, addr := range dht.DefaultBootstrapPeers {
-			pi, _ := peer.AddrInfoFromP2pAddr(addr)
-			// We ignore errors as some bootstrap peers may be down
-			// and that is fine.
-			h2.Connect(ctx, *pi)
+	// This connects to public bootstrappers
+	for _, addr := range dht.DefaultBootstrapPeers {
+		pi, err := peer.AddrInfoFromP2pAddr(addr)
+		if err != nil {
+			log.Printf("Failed to get AddrInfo: %v", err)
+			continue
 		}
-	*/
+		err = h2.Connect(ctx, *pi)
+		if err != nil {
+			log.Printf("Failed to connect to peer %v: %v", pi, err)
+		} else {
+			log.Printf("Successfully connected to peer %v", pi)
+		}
+	}
+
 	log.Printf("Hello World, my second hosts ID is %s\n", h2.ID())
 }
